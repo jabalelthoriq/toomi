@@ -1,0 +1,6 @@
+package com.toomi.app.core.config
+
+object SupabaseConfig {
+    const val SUPABASE_URL = "https://almvqjqfrkttezjarzqf.supabase.co"
+    const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsbXZxanFmcmt0dGV6amFyenFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NDgzNjUsImV4cCI6MjEwNjUyNDM2NX0.Rz1uqJxYg0adxImRPNT9YQoIchw-r453ezv1HuyfXlc"
+}

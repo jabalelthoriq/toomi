@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+build/
+android/.gradle/
+android/build/
+android/app/build/
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.navigation/
+captures/
+local.properties
+.DS_Store
+
+# WSL / Windows zone files
+*:Zone.Identifier
+
+# Original Kenney raw zip / unneeded format folder if not needed
+kenney_cube-pets_1.0/

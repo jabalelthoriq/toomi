@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Toomi LDR Companion</string>
+    <string name="title_pairing">Hubungkan dengan Pasangan</string>
+    <string name="desc_pairing">Bagikan kode unik di bawah ini atau masukkan kode pasangan Anda.</string>
+    <string name="btn_start_overlay">Aktifkan Karakter Melayang</string>
+    <string name="btn_stop_overlay">Matikan Karakter Melayang</string>
+    <string name="btn_send_poke">Kirim Poke (Cubit) 💖</string>
+    <string name="btn_send_wave">Kirim Lambaian 👋</string>
+</resources>
