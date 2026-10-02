@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 object SupabaseManager {
 
@@ -86,9 +88,18 @@ object SupabaseManager {
     fun broadcastInteraction(payload: InteractionBroadcastPayload) {
         scope.launch {
             try {
+                val jsonObject = kotlinx.serialization.json.buildJsonObject {
+                    put("event_type", payload.eventType)
+                    put("sender_id", payload.senderId)
+                    put("timestamp", payload.timestamp)
+                    payload.message?.let { put("message", it) }
+                    payload.animationCode?.let { put("animation_code", it) }
+                    payload.batteryLevel?.let { put("battery_level", it) }
+                    payload.isCharging?.let { put("is_charging", it) }
+                }
                 activeCoupleChannel?.broadcast(
                     event = "interaction",
-                    payload = payload
+                    message = jsonObject
                 )
                 Log.d(TAG, "Broadcasted event: ${payload.eventType}")
             } catch (e: Exception) {
