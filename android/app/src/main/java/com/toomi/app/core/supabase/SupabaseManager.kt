@@ -98,6 +98,10 @@ object SupabaseManager {
     }
 
     fun getCurrentUserId(): String? {
-        return client.auth.currentUserOrNull()?.id
+        return try {
+            client.auth.currentSessionOrNull()?.user?.id
+        } catch (e: Exception) {
+            null
+        }
     }
 }
