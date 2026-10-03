@@ -147,7 +147,7 @@ class LoginActivity : AppCompatActivity() {
     private fun signInWithGoogle() {
         setLoading(true)
         lifecycleScope.launch {
-            // Coba dengan Google Credential Manager jika Client ID tersedia
+            // 1. Gunakan Google Credential Manager jika Client ID terpasang
             if (SupabaseConfig.GOOGLE_WEB_CLIENT_ID.isNotEmpty()) {
                 try {
                     val credentialManager = CredentialManager.create(this@LoginActivity)
@@ -168,32 +168,50 @@ class LoginActivity : AppCompatActivity() {
                         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val idToken = googleIdTokenCredential.idToken
+                        
+                        Log.d(TAG, "Google ID Token received successfully, verifying with Supabase...")
                         val res = SupabaseManager.signInWithGoogle(idToken)
                         setLoading(false)
+                        
                         res.onSuccess {
+                            Toast.makeText(this@LoginActivity, "Login Google Berhasil!", Toast.LENGTH_SHORT).show()
                             checkActiveDeviceSessionAndProceed()
-                        }.onFailure {
-                            Toast.makeText(this@LoginActivity, "Login Supabase gagal: ${it.message}", Toast.LENGTH_LONG).show()
+                        }.onFailure { err ->
+                            Log.e(TAG, "Supabase ID Token validation failed", err)
+                            val alertMsg = "Supabase menolak ID Token: ${err.message}\n\nPastikan Client ID di Supabase Dashboard (Auth > Providers > Google) persis sama dengan Web Client ID ini:\n${SupabaseConfig.GOOGLE_WEB_CLIENT_ID}"
+                            AlertDialog.Builder(this@LoginActivity)
+                                .setTitle("Gagal Login Google")
+                                .setMessage(alertMsg)
+                                .setPositiveButton("OK", null)
+                                .show()
                         }
                         return@launch
                     }
                 } catch (e: GetCredentialCancellationException) {
                     setLoading(false)
+                    Log.d(TAG, "User cancelled Google sign in")
                     return@launch
                 } catch (e: Exception) {
-                    Log.w(TAG, "Credential manager fallback to OAuth", e)
+                    setLoading(false)
+                    Log.e(TAG, "Credential Manager Exception", e)
+                    val alertMsg = "Gagal mengambil kredensial Google: ${e.message}\n\nPastikan SHA-1 fingerprint dari aplikasi Anda sudah didaftarkan di Google Cloud Console pada OAuth Client ID (Android)."
+                    AlertDialog.Builder(this@LoginActivity)
+                        .setTitle("Error Google Credential")
+                        .setMessage(alertMsg)
+                        .setPositiveButton("OK", null)
+                        .show()
+                    return@launch
                 }
             }
 
-            // Fallback: Supabase Web OAuth
+            // 2. Fallback: Supabase Web OAuth jika Web Client ID kosong
             try {
                 SupabaseManager.client.auth.signInWith(Google)
                 setLoading(false)
-                checkActiveDeviceSessionAndProceed()
             } catch (e: Exception) {
                 setLoading(false)
-                Log.e(TAG, "Error signing in with Google", e)
-                Toast.makeText(this@LoginActivity, "Login Google gagal: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Error signing in with Google Web OAuth", e)
+                Toast.makeText(this@LoginActivity, "Login Google OAuth gagal: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
