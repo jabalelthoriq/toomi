@@ -217,7 +217,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     /**
-     * Memeriksa apakah akun sedang aktif di HP lain (1 User 1 HP Policy)
+     * Mendaftarkan perangkat ini sebagai sesi aktif dan langsung masuk ke halaman utama
+     * Sesi pada perangkat lama akan otomatis dinonaktifkan (Single Device Policy)
      */
     private fun checkActiveDeviceSessionAndProceed() {
         setLoading(true)
@@ -225,85 +226,15 @@ class LoginActivity : AppCompatActivity() {
             val sessionResponse = SupabaseManager.requestDeviceSession()
             setLoading(false)
 
-            if (sessionResponse.status == "GRANTED") {
-                proceedToMain()
-            } else if (sessionResponse.status == "NEED_APPROVAL") {
-                val activeDevName = sessionResponse.activeDeviceName ?: "HP Anda yang lain"
-                val reqId = sessionResponse.requestId
-                showWaitingApprovalDialog(activeDevName, reqId)
+            if (sessionResponse.isSwitched) {
+                val prevName = sessionResponse.previousDeviceName ?: "Perangkat sebelumnya"
+                Toast.makeText(
+                    this@LoginActivity,
+                    "Sesi berhasil dialihkan dari $prevName ke HP ini! ✨",
+                    Toast.LENGTH_LONG
+                ).show()
             }
-        }
-    }
-
-    /**
-     * Dialog modal menunggu persetujuan (ACC) dari perangkat lama atau opsi ambil alih sesi langsung
-     */
-    private fun showWaitingApprovalDialog(activeDeviceName: String, requestId: String?) {
-        SupabaseManager.listenToDeviceControl()
-
-        val builder = AlertDialog.Builder(this)
-            .setTitle("🔒 Konfirmasi Masuk Perangkat")
-            .setMessage("Akun Toomi Anda saat ini terdaftar aktif di perangkat:\n\n📱 $activeDeviceName\n\nAnda dapat menunggu persetujuan (ACC) dari HP tersebut, atau langsung memindahkan sesi aktif ke HP ini.")
-            .setCancelable(false)
-            .setPositiveButton("Pindahkan Sesi ke HP Ini") { dialog, _ ->
-                dialog.dismiss()
-                setLoading(true)
-                lifecycleScope.launch {
-                    val res = SupabaseManager.forceClaimDeviceSession()
-                    setLoading(false)
-                    Toast.makeText(this@LoginActivity, "Sesi berhasil dialihkan ke HP ini!", Toast.LENGTH_SHORT).show()
-                    proceedToMain()
-                }
-            }
-            .setNeutralButton("Tunggu ACC") { dialog, _ ->
-                // Biarkan dialog atau polling tetap berjalan
-                Toast.makeText(this, "Menunggu konfirmasi dari $activeDeviceName...", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Batalkan") { dialog, _ ->
-                dialog.dismiss()
-                lifecycleScope.launch {
-                    SupabaseManager.signOut()
-                }
-            }
-
-        approvalDialog = builder.create()
-        approvalDialog?.show()
-
-        // Dengarkan realtime event jika HP lama meng-ACC atau menolak
-        deviceControlJob?.cancel()
-        deviceControlJob = lifecycleScope.launch {
-            SupabaseManager.deviceControlEvents.collectLatest { event ->
-                if (event.eventType == "LOGIN_APPROVED") {
-                    approvalDialog?.dismiss()
-                    Toast.makeText(this@LoginActivity, "Persetujuan diterima! Berhasil masuk.", Toast.LENGTH_LONG).show()
-                    proceedToMain()
-                } else if (event.eventType == "LOGIN_REJECTED") {
-                    approvalDialog?.dismiss()
-                    Toast.makeText(this@LoginActivity, "Permintaan masuk ditolak oleh HP aktif.", Toast.LENGTH_LONG).show()
-                    SupabaseManager.signOut()
-                }
-            }
-        }
-
-        // Polling status secara berkala jika sinyal WebSocket terputus
-        if (!requestId.isNullOrEmpty()) {
-            lifecycleScope.launch {
-                while (approvalDialog?.isShowing == true) {
-                    kotlinx.coroutines.delay(2000)
-                    val status = SupabaseManager.getLoginRequestStatus(requestId)
-                    if (status == "APPROVED") {
-                        approvalDialog?.dismiss()
-                        Toast.makeText(this@LoginActivity, "Persetujuan diterima! Berhasil masuk.", Toast.LENGTH_LONG).show()
-                        proceedToMain()
-                        break
-                    } else if (status == "REJECTED") {
-                        approvalDialog?.dismiss()
-                        Toast.makeText(this@LoginActivity, "Permintaan masuk ditolak oleh HP aktif.", Toast.LENGTH_LONG).show()
-                        SupabaseManager.signOut()
-                        break
-                    }
-                }
-            }
+            proceedToMain()
         }
     }
 

@@ -198,7 +198,7 @@ object SupabaseManager {
 
     /**
      * Memeriksa dan mendaftarkan perangkat ini sebagai sesi aktif.
-     * Jika ada perangkat lain yang sedang aktif, akan mengembalikan status NEED_APPROVAL
+     * Secara otomatis mengambil alih sesi aktif dan mengirimkan kick-out ke perangkat lama.
      */
     suspend fun requestDeviceSession(): DeviceSessionResponse {
         return try {
@@ -212,16 +212,17 @@ object SupabaseManager {
             val jsonElement = response.decodeAs<kotlinx.serialization.json.JsonElement>()
             val parsed = json.decodeFromJsonElement<DeviceSessionResponse>(jsonElement)
 
-            // Jika butuh approval, broadcast permintaan ke channel user
-            if (parsed.status == "NEED_APPROVAL" && parsed.requestId != null) {
-                broadcastDeviceControlEvent(
-                    DeviceControlBroadcastPayload(
-                        eventType = "LOGIN_REQUEST",
-                        userId = getCurrentUserId() ?: "",
-                        requestId = parsed.requestId,
-                        requesterDeviceName = getDeviceName()
+            // Jika berganti perangkat, broadcast kick-out ke HP lama
+            if (parsed.isSwitched) {
+                getCurrentUserId()?.let { uid ->
+                    broadcastDeviceControlEvent(
+                        DeviceControlBroadcastPayload(
+                            eventType = "KICK_OUT",
+                            userId = uid,
+                            requesterDeviceName = getDeviceName()
+                        )
                     )
-                )
+                }
             }
 
             parsed
@@ -232,35 +233,14 @@ object SupabaseManager {
     }
 
     /**
-     * Mengambil alih sesi aktif secara paksa ke HP ini (misal HP lama offline/rusak/ganti HP)
+     * Memeriksa apakah perangkat ini masih merupakan perangkat aktif yang sah
      */
-    suspend fun forceClaimDeviceSession(): DeviceSessionResponse {
+    suspend fun isCurrentDeviceActive(): Boolean {
         return try {
-            val response = client.postgrest.rpc(
-                function = "force_claim_device_session",
-                parameters = buildJsonObject {
-                    put("p_device_id", getDeviceId())
-                    put("p_device_name", getDeviceName())
-                }
-            )
-            val jsonElement = response.decodeAs<kotlinx.serialization.json.JsonElement>()
-            val parsed = json.decodeFromJsonElement<DeviceSessionResponse>(jsonElement)
-
-            // Broadcast kick-out ke HP lama jika sedang online
-            getCurrentUserId()?.let { uid ->
-                broadcastDeviceControlEvent(
-                    DeviceControlBroadcastPayload(
-                        eventType = "KICK_OUT",
-                        userId = uid,
-                        requesterDeviceName = getDeviceName()
-                    )
-                )
-            }
-
-            parsed
+            val profile = getMyProfile() ?: return true
+            profile.activeDeviceId == null || profile.activeDeviceId == getDeviceId()
         } catch (e: Exception) {
-            Log.e(TAG, "Error force claiming device session", e)
-            DeviceSessionResponse(status = "GRANTED", message = e.message)
+            true
         }
     }
 

@@ -65,11 +65,15 @@ data class LoginRequest(
 
 @Serializable
 data class DeviceSessionResponse(
-    val status: String, // GRANTED, NEED_APPROVAL
+    val status: String = "GRANTED", // GRANTED, NEED_APPROVAL
     @SerialName("request_id")
     val requestId: String? = null,
     @SerialName("active_device_name")
     val activeDeviceName: String? = null,
+    @SerialName("previous_device_name")
+    val previousDeviceName: String? = null,
+    @SerialName("is_switched")
+    val isSwitched: Boolean = false,
     val message: String? = null
 )
 

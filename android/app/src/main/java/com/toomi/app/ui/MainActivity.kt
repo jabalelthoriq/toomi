@@ -254,19 +254,16 @@ class MainActivity : AppCompatActivity() {
         loadFriendsList()
     }
 
-    private var pendingRequestPollingJob: Job? = null
     private var heartbeatJob: Job? = null
 
     override fun onResume() {
         super.onResume()
-        checkPendingLoginRequests()
-        startPendingRequestPolling()
         startHeartbeat()
+        checkDeviceSessionValidity()
     }
 
     override fun onPause() {
         super.onPause()
-        pendingRequestPollingJob?.cancel()
         heartbeatJob?.cancel()
     }
 
@@ -280,22 +277,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startPendingRequestPolling() {
-        pendingRequestPollingJob?.cancel()
-        pendingRequestPollingJob = lifecycleScope.launch {
-            while (true) {
-                kotlinx.coroutines.delay(3000)
-                checkPendingLoginRequests()
-            }
-        }
-    }
-
-    private fun checkPendingLoginRequests() {
+    private fun checkDeviceSessionValidity() {
         lifecycleScope.launch {
-            val pendingList = SupabaseManager.getPendingLoginRequests()
-            if (pendingList.isNotEmpty()) {
-                val latest = pendingList.first()
-                showIncomingLoginApprovalDialog(latest.requesterDeviceName, latest.id)
+            val isActive = SupabaseManager.isCurrentDeviceActive()
+            if (!isActive) {
+                handleKickOut("Perangkat Baru Lain")
             }
         }
     }
@@ -308,58 +294,27 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             SupabaseManager.deviceControlEvents.collectLatest { event ->
                 when (event.eventType) {
-                    "LOGIN_REQUEST" -> {
-                        val reqDevice = event.requesterDeviceName ?: "Perangkat Lain"
-                        val reqId = event.requestId ?: ""
-                        showIncomingLoginApprovalDialog(reqDevice, reqId)
-                    }
                     "KICK_OUT" -> {
-                        handleKickOut()
+                        val reqDevice = event.requesterDeviceName ?: "Perangkat Baru"
+                        handleKickOut(reqDevice)
                     }
                 }
             }
         }
-        checkPendingLoginRequests()
     }
 
-    /**
-     * Dialog konfirmasi ACC jika ada HP lain yang mencoba masuk ke akun ini
-     */
-    private fun showIncomingLoginApprovalDialog(requesterDevice: String, requestId: String) {
-        if (incomingLoginDialog?.isShowing == true) return
-        incomingLoginDialog?.dismiss()
-        val builder = AlertDialog.Builder(this)
-            .setTitle("⚠️ Permintaan Masuk Perangkat Baru")
-            .setMessage("Perangkat lain ($requesterDevice) meminta izin untuk masuk ke akun Toomi Anda.\n\nJika Anda mengizinkan (ACC), akun di HP ini akan langsung keluar secara otomatis.")
-            .setCancelable(false)
-            .setPositiveButton("ACC (Izinkan Masuk)") { dialog, _ ->
-                dialog.dismiss()
-                lifecycleScope.launch {
-                    val res = SupabaseManager.approveLoginRequest(requestId)
-                    res.onSuccess {
-                        Toast.makeText(this@MainActivity, "Persetujuan diberikan. Mengeluarkan akun dari HP ini...", Toast.LENGTH_SHORT).show()
-                        handleKickOut()
-                    }.onFailure {
-                        Toast.makeText(this@MainActivity, "Gagal memproses ACC: ${it.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            .setNegativeButton("Tolak") { dialog, _ ->
-                dialog.dismiss()
-                lifecycleScope.launch {
-                    SupabaseManager.rejectLoginRequest(requestId)
-                    Toast.makeText(this@MainActivity, "Permintaan masuk berhasil ditolak.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-        incomingLoginDialog = builder.create()
-        incomingLoginDialog?.show()
-    }
-
-    private fun handleKickOut() {
+    private fun handleKickOut(newDeviceName: String = "Perangkat Baru") {
         stopOverlayService()
-        Toast.makeText(this, "Sesi Anda telah dialihkan ke perangkat baru.", Toast.LENGTH_LONG).show()
-        redirectToLogin()
+        if (isFinishing || isDestroyed) return
+
+        AlertDialog.Builder(this)
+            .setTitle("🔒 Sesi Berakhir")
+            .setMessage("Akun Toomi Anda telah masuk di perangkat baru ($newDeviceName).\n\nSesuai kebijakan keamanan (1 Akun = 1 HP Aktif), sesi pada HP ini telah dinonaktifkan.")
+            .setCancelable(false)
+            .setPositiveButton("Mengerti") { _, _ ->
+                redirectToLogin()
+            }
+            .show()
     }
 
     private fun redirectToLogin() {
