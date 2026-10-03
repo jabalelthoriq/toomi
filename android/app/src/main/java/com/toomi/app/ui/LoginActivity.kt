@@ -19,6 +19,7 @@ import com.toomi.app.core.config.SupabaseConfig
 import com.toomi.app.core.supabase.SupabaseManager
 import com.toomi.app.databinding.ActivityLoginBinding
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.handleDeeplinks
 import io.github.jan.supabase.auth.providers.Google
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -46,6 +47,31 @@ class LoginActivity : AppCompatActivity() {
         }
 
         setupListeners()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (SupabaseManager.isUserLoggedIn()) {
+            checkActiveDeviceSessionAndProceed()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val data = intent.data
+        if (data != null && data.scheme == "toomi") {
+            lifecycleScope.launch {
+                try {
+                    SupabaseManager.client.handleDeeplinks(intent)
+                    if (SupabaseManager.isUserLoggedIn()) {
+                        checkActiveDeviceSessionAndProceed()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error handling oauth deeplink", e)
+                }
+            }
+        }
     }
 
     private fun setupListeners() {

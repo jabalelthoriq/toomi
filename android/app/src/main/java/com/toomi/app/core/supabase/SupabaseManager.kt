@@ -73,7 +73,10 @@ object SupabaseManager {
             supabaseUrl = SupabaseConfig.SUPABASE_URL,
             supabaseKey = SupabaseConfig.SUPABASE_ANON_KEY
         ) {
-            install(Auth)
+            install(Auth) {
+                scheme = "toomi"
+                host = "login-callback"
+            }
             install(Postgrest)
             install(Realtime)
             install(Storage)
