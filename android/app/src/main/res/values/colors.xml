@@ -1,44 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Cute Pastel Palette (Based on reference UI) -->
-    <color name="primary">#FF5B84</color>
-    <color name="primary_dark">#E04068</color>
-    <color name="primary_light">#FFEBF0</color>
-    <color name="primary_gradient_start">#FFA2BA</color>
-    <color name="primary_gradient_end">#FF5B84</color>
-    
+    <!-- Clean Minimalist Modern Palette (White Background + Crisp Coral Pink Accent) -->
+    <color name="primary">#FF385C</color>
+    <color name="primary_dark">#E00B41</color>
+    <color name="primary_light">#FFF0F3</color>
+    <color name="primary_gradient_start">#FF5A78</color>
+    <color name="primary_gradient_end">#FF385C</color>
+
     <!-- Backgrounds -->
-    <color name="bg_main">#FFF5F7</color>
+    <color name="bg_main">#FFFFFF</color>
+    <color name="bg_surface">#F9FAFB</color>
     <color name="bg_card">#FFFFFF</color>
-    <color name="bg_input">#FAF2F4</color>
-    
+    <color name="bg_input">#F3F4F6</color>
+
     <!-- Text Colors -->
-    <color name="text_dark">#2D2638</color>
-    <color name="text_secondary">#8E869B</color>
+    <color name="text_dark">#111827</color>
+    <color name="text_secondary">#4B5563</color>
+    <color name="text_muted">#9CA3AF</color>
     <color name="text_white">#FFFFFF</color>
-    <color name="text_pink">#FF5B84</color>
-    
-    <!-- Accents & Badges -->
-    <color name="accent_yellow_bg">#FFF8E7</color>
-    <color name="accent_yellow_text">#E69500</color>
-    <color name="accent_purple_bg">#F4F0FF</color>
-    <color name="accent_purple_text">#7B61FF</color>
-    <color name="accent_mint_bg">#EBF9F3</color>
-    <color name="accent_mint_text">#27AE60</color>
-    
+    <color name="text_pink">#FF385C</color>
+
     <!-- Borders & Dividers -->
-    <color name="card_stroke">#FCE6EC</color>
-    <color name="divider_soft">#F5E8EC</color>
-    
+    <color name="card_stroke">#E5E7EB</color>
+    <color name="divider_soft">#F3F4F6</color>
+
+    <!-- Accents & Status -->
+    <color name="accent_green">#10B981</color>
+    <color name="accent_green_light">#ECFDF5</color>
+    <color name="accent_yellow_bg">#FEF3C7</color>
+    <color name="accent_yellow_text">#D97706</color>
+    <color name="accent_purple_bg">#EEF2FF</color>
+    <color name="accent_purple_text">#4F46E5</color>
+    <color name="accent_mint_bg">#ECFDF5</color>
+    <color name="accent_mint_text">#10B981</color>
+
     <!-- Navbar -->
     <color name="nav_bg">#FFFFFF</color>
-    <color name="nav_selected">#FF5B84</color>
-    <color name="nav_unselected">#A8A0B2</color>
-    <color name="nav_shadow">#1A2D2638</color>
+    <color name="nav_selected">#FF385C</color>
+    <color name="nav_unselected">#9CA3AF</color>
 
     <!-- Legacy mapped colors for backwards compatibility -->
-    <color name="accent">#7B61FF</color>
-    <color name="bg_dark">#FFF5F7</color>
-    <color name="text_muted">#8E869B</color>
+    <color name="accent">#4F46E5</color>
+    <color name="bg_dark">#FFFFFF</color>
     <color name="card_bg">#FFFFFF</color>
 </resources>

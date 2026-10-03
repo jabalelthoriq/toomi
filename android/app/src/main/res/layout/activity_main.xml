@@ -5,85 +5,92 @@
     android:layout_height="match_parent"
     android:background="@color/bg_main">
 
-    <!-- Scrollable Main Content -->
-    <ScrollView
+    <!-- Tab Container: Hosts the 4 clean screens -->
+    <FrameLayout
+        android:id="@+id/tab_content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_curved_navbar_container"
-        android:clipToPadding="false"
-        android:padding="20dp">
+        android:layout_above="@id/layout_curved_navbar_container">
 
-        <LinearLayout
+        <!-- =================================================== -->
+        <!-- TAB 1: BERANDA (HOME) -->
+        <!-- =================================================== -->
+        <ScrollView
+            android:id="@+id/layout_tab_home"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="20dp"
+            android:visibility="visible">
 
-            <!-- Top Header & App Bar (Like Reference image.png) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
+                <!-- Header -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Selamat datang! 👋"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tv_user_display_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Toomi Friends"
+                            android:textColor="@color/text_dark"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <TextView
+                        android:id="@+id/tv_home_device_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Selamat datang! ✨"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/tv_user_display_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Toomi Friends 💕"
-                        android:textColor="@color/text_dark"
-                        android:textSize="24sp"
+                        android:background="@drawable/bg_pastel_chip"
+                        android:backgroundTint="@color/accent_mint_bg"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:text="📱 HP Terhubung"
+                        android:textColor="@color/accent_mint_text"
+                        android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- Logout / Device Badge -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_logout"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:backgroundTint="@color/primary_light"
-                    android:text="Keluar 🚪"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="14dp" />
-            </LinearLayout>
-
-            <!-- 1. Hero Card (Today's Companion Mood - Pink Gradient Banner) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_active_companion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
-
-                <FrameLayout
+                <!-- Active Companion Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_active_companion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_hero_card"
-                    android:padding="20dp">
+                    android:layout_marginTop="18dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:padding="18dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -91,34 +98,32 @@
                             android:gravity="center_vertical"
                             android:orientation="horizontal">
 
-                            <!-- Cute Glowing Mascot Avatar Circle -->
                             <FrameLayout
-                                android:layout_width="60dp"
-                                android:layout_height="60dp"
-                                android:background="@drawable/bg_pastel_chip"
-                                android:backgroundTint="#40FFFFFF">
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_floating_center_btn">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center"
                                     android:text="💖"
-                                    android:textSize="28sp" />
+                                    android:textSize="22sp" />
                             </FrameLayout>
 
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
+                                android:layout_marginStart="14dp"
                                 android:layout_weight="1"
                                 android:orientation="vertical">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Pasangan Layar Aktif ✨"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="12sp"
+                                    android:text="Pasangan Layar Aktif"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="11sp"
                                     android:textStyle="bold" />
 
                                 <TextView
@@ -126,18 +131,18 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="2dp"
-                                    android:text="Pilih teman di bawah untuk dipasangkan"
-                                    android:textColor="#FFFFFF"
+                                    android:text="Belum ada teman dipasang"
+                                    android:textColor="@color/text_dark"
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
                             </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Quick Interaction Actions in Hero Card -->
+                        <!-- Quick Interaction Buttons on Home -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="14dp"
                             android:orientation="horizontal">
 
                             <com.google.android.material.button.MaterialButton
@@ -146,13 +151,13 @@
                                 android:layout_height="44dp"
                                 android:layout_marginEnd="6dp"
                                 android:layout_weight="1"
-                                android:backgroundTint="#FFFFFF"
+                                android:backgroundTint="@color/primary_light"
                                 android:text="Cubit (Poke) 💖"
                                 android:textAllCaps="false"
                                 android:textColor="@color/primary"
                                 android:textSize="12sp"
                                 android:textStyle="bold"
-                                app:cornerRadius="14dp" />
+                                app:cornerRadius="12dp" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_send_wave"
@@ -160,48 +165,722 @@
                                 android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
                                 android:layout_weight="1"
-                                android:backgroundTint="#33FFFFFF"
+                                android:backgroundTint="@color/primary_light"
                                 android:text="Lambaian 👋"
                                 android:textAllCaps="false"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/primary"
                                 android:textSize="12sp"
                                 android:textStyle="bold"
-                                app:cornerRadius="14dp"
-                                app:strokeColor="#80FFFFFF"
-                                app:strokeWidth="1dp" />
+                                app:cornerRadius="12dp" />
                         </LinearLayout>
                     </LinearLayout>
-                </FrameLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- 2. Your Toomi ID Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/card_stroke"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
+                <!-- Mascot 3D Selection Card -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:padding="18dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:text="Pilih Maskot 3D 🐾"
+                            android:textColor="@color/text_dark"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Pilih model hewan 3D yang akan melayang di layar"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                        <Spinner
+                            android:id="@+id/spinner_pet_selector"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/bg_pastel_chip"
+                            android:backgroundTint="@color/bg_input" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Floating Overlay Service Switch Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Karakter Melayang di Layar 📱"
+                            android:textColor="@color/text_dark"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Maskot interaktif akan melayang di atas semua aplikasi Anda"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_toggle_overlay"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="14dp"
+                            android:backgroundTint="@color/primary"
+                            android:text="@string/btn_start_overlay"
+                            android:textAllCaps="false"
+                            android:textColor="@color/text_white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="14dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- =================================================== -->
+        <!-- TAB 2: TEMAN (FRIENDS) -->
+        <!-- =================================================== -->
+        <ScrollView
+            android:id="@+id/layout_tab_friends"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Teman &amp; Pasangan 💕"
+                    android:textColor="@color/text_dark"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Kelola teman dan pasangkan maskot ke layar bersama"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <!-- My Toomi ID Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="ID TOOMI ANDA"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tv_my_toomi_id"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:letterSpacing="0.1"
+                                android:text="TM-XXXXXX"
+                                android:textColor="@color/primary"
+                                android:textSize="22sp"
+                                android:textStyle="bold" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_copy_toomi_id"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="38dp"
+                                android:backgroundTint="@color/primary_light"
+                                android:text="Salin 📋"
+                                android:textColor="@color/primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                app:cornerRadius="12dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_share_toomi_id"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="38dp"
+                                android:layout_marginStart="6dp"
+                                android:backgroundTint="@color/primary_light"
+                                android:text="Bagikan 🚀"
+                                android:textColor="@color/primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                app:cornerRadius="12dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Add Friend by Toomi ID Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tambah Teman Baru"
+                            android:textColor="@color/text_dark"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Masukkan ID Toomi teman untuk mengirim permintaan"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="ID Toomi (TM-XXXXXX)"
+                                app:boxBackgroundColor="@color/bg_input"
+                                app:boxCornerRadiusBottomEnd="12dp"
+                                app:boxCornerRadiusBottomStart="12dp"
+                                app:boxCornerRadiusTopEnd="12dp"
+                                app:boxCornerRadiusTopStart="12dp"
+                                app:boxStrokeColor="@color/primary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/et_search_toomi_id"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textAllCaps="true"
+                                    android:textColor="@color/text_dark" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_add_friend"
+                                android:layout_width="wrap_content"
+                                android:layout_height="52dp"
+                                android:layout_marginStart="8dp"
+                                android:backgroundTint="@color/primary"
+                                android:text="Tambah ➕"
+                                android:textAllCaps="false"
+                                android:textColor="@color/text_white"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                app:cornerRadius="12dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Friends List Section -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tv_friends_title"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Daftar Teman (0)"
+                                android:textColor="@color/text_dark"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_refresh_friends"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="36dp"
+                                android:text="Segarkan 🔄"
+                                android:textColor="@color/primary"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <!-- Dynamic list of friends -->
+                        <LinearLayout
+                            android:id="@+id/layout_friends_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_no_friends"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:paddingVertical="16dp"
+                                android:text="Belum ada teman. Bagikan ID Toomi Anda atau tambahkan teman baru!"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- =================================================== -->
+        <!-- TAB 3: INTERAKSI (INTERACTION) -->
+        <!-- =================================================== -->
+        <ScrollView
+            android:id="@+id/layout_tab_interaction"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Interaksi Langsung ⚡"
+                    android:textColor="@color/text_dark"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Kirim getaran dan animasi instan ke layar teman aktif"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <!-- Active Target Status Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TARGET TEMAN AKTIF"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_interaction_target"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Pilih teman di tab Teman terlebih dahulu"
+                            android:textColor="@color/primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Actions 2x2 Grid -->
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:columnCount="2"
+                    android:rowCount="2">
+
+                    <!-- Action 1: Poke -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btn_action_poke"
+                        android:layout_width="0dp"
+                        android:layout_height="120dp"
+                        android:layout_rowWeight="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="@color/bg_card"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/card_stroke"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💖"
+                                android:textSize="32sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Cubit (Poke)"
+                                android:textColor="@color/text_dark"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Action 2: Wave -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btn_action_wave"
+                        android:layout_width="0dp"
+                        android:layout_height="120dp"
+                        android:layout_rowWeight="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="@color/bg_card"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/card_stroke"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="👋"
+                                android:textSize="32sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Lambaian"
+                                android:textColor="@color/text_dark"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Action 3: Love -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btn_action_love"
+                        android:layout_width="0dp"
+                        android:layout_height="120dp"
+                        android:layout_rowWeight="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="@color/bg_card"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/card_stroke"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💌"
+                                android:textSize="32sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Kirim Cinta"
+                                android:textColor="@color/text_dark"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Action 4: Pat -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btn_action_pat"
+                        android:layout_width="0dp"
+                        android:layout_height="120dp"
+                        android:layout_rowWeight="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="@color/bg_card"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/card_stroke"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🐾"
+                                android:textSize="32sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Tepuk Sayang"
+                                android:textColor="@color/text_dark"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </GridLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- =================================================== -->
+        <!-- TAB 4: PROFIL (PROFILE & SETTINGS) -->
+        <!-- =================================================== -->
+        <ScrollView
+            android:id="@+id/layout_tab_profile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Profil &amp; Keamanan ⚙️"
+                    android:textColor="@color/text_dark"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Informasi akun dan manajemen perangkat aktif"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <!-- Profile Info Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <FrameLayout
+                                android:layout_width="56dp"
+                                android:layout_height="56dp"
+                                android:background="@drawable/bg_pastel_chip"
+                                android:backgroundTint="@color/primary_light">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:text="👤"
+                                    android:textSize="26sp" />
+                            </FrameLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="14dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tv_profile_name"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Nama Pengguna"
+                                    android:textColor="@color/text_dark"
+                                    android:textSize="17sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tv_user_email"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="user@email.com"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Single Device Policy Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="KEAMANAN PERANGKAT (1 USER = 1 HP)"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp"
                             android:textStyle="bold" />
@@ -210,297 +889,46 @@
                             android:id="@+id/tv_device_info"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@color/accent_mint_bg"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="3dp"
-                            android:text="📱 HP Aktif"
-                            android:textColor="@color/accent_mint_text"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/tv_my_toomi_id"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:letterSpacing="0.1"
-                            android:text="TM-XXXXXX"
-                            android:textColor="@color/primary"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_copy_toomi_id"
-                            style="@style/Widget.Material3.Button.TonalButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="38dp"
-                            android:backgroundTint="@color/primary_light"
-                            android:text="Salin 📋"
-                            android:textColor="@color/primary"
-                            android:textSize="12sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="12dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_share_toomi_id"
-                            style="@style/Widget.Material3.Button.TonalButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="38dp"
-                            android:layout_marginStart="6dp"
-                            android:backgroundTint="@color/primary_light"
-                            android:text="Bagikan 🚀"
-                            android:textColor="@color/primary"
-                            android:textSize="12sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="12dp" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_user_email"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="user@email.com"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 3. Add Friend (Pairing via Toomi ID) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/card_stroke"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tambah Teman Baru ✨"
-                        android:textColor="@color/text_dark"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Ketikkan ID Toomi teman untuk saling berteman"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:hint="ID Toomi (misal: TM-9A2K7X)"
-                            app:boxBackgroundColor="@color/bg_input"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp"
-                            app:boxStrokeColor="@color/primary">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/et_search_toomi_id"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textAllCaps="true"
-                                android:textColor="@color/text_dark" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_add_friend"
-                            android:layout_width="wrap_content"
-                            android:layout_height="54dp"
-                            android:layout_marginStart="8dp"
-                            android:backgroundTint="@color/primary"
-                            android:text="Tambah ➕"
-                            android:textAllCaps="false"
-                            android:textColor="@color/text_white"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="14dp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 4. Friends List Section (Like My Routine / Routine in image.png) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/card_stroke"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/tv_friends_title"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Daftar Teman (0)"
+                            android:layout_marginTop="6dp"
+                            android:text="📱 HP Terhubung: Memuat..."
                             android:textColor="@color/text_dark"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_refresh_friends"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="36dp"
-                            android:text="Segarkan 🔄"
-                            android:textColor="@color/primary"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <!-- Dynamic container for friends -->
-                    <LinearLayout
-                        android:id="@+id/layout_friends_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="vertical">
-
                         <TextView
-                            android:id="@+id/tv_no_friends"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:paddingVertical="16dp"
-                            android:text="Belum ada teman. Bagikan ID Toomi Anda atau tambahkan teman baru!"
+                            android:layout_marginTop="4dp"
+                            android:text="Status: Terverifikasi Aktif 🔒\nJika Anda login di HP baru, HP ini akan menerima dialog persetujuan (ACC) secara otomatis."
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- 5. Mascot 3D Selector Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/card_stroke"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
+                <!-- Logout Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_logout"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="24dp"
+                    android:backgroundTint="@color/primary_light"
+                    android:text="Keluar dari Akun 🚪"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="14dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pilih Maskot Hewan 3D 🐾"
-                        android:textColor="@color/text_dark"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+            </LinearLayout>
+        </ScrollView>
 
-                    <Spinner
-                        android:id="@+id/spinner_pet_selector"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="10dp"
-                        android:backgroundTint="@color/primary" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
 
-            <!-- 6. Floating Overlay Toggle Control -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="32dp"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/card_stroke"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Karakter Melayang di Layar 📱"
-                        android:textColor="@color/text_dark"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Maskot 3D akan melayang di atas layar homescreen dan aplikasi lain"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_toggle_overlay"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="14dp"
-                        android:backgroundTint="@color/primary"
-                        android:text="@string/btn_start_overlay"
-                        android:textAllCaps="false"
-                        android:textColor="@color/text_white"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="16dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- 7. Cute Curved Bottom Navigation Bar Container (Like image.png) -->
+    <!-- =================================================== -->
+    <!-- CURVED BOTTOM NAVBAR CONTAINER (FUNCTIONAL) -->
+    <!-- =================================================== -->
     <RelativeLayout
         android:id="@+id/layout_curved_navbar_container"
         android:layout_width="match_parent"
@@ -518,7 +946,7 @@
             android:orientation="horizontal"
             android:paddingHorizontal="16dp">
 
-            <!-- Tab 1: Home -->
+            <!-- Tab 1: Beranda -->
             <LinearLayout
                 android:id="@+id/nav_tab_home"
                 android:layout_width="0dp"
@@ -530,16 +958,18 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/iv_nav_home"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@drawable/ic_nav_home"
                     app:tint="@color/primary" />
 
                 <TextView
+                    android:id="@+id/tv_nav_home"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Home"
+                    android:text="Beranda"
                     android:textColor="@color/primary"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -557,12 +987,14 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/iv_nav_friends"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@drawable/ic_nav_friends"
                     app:tint="@color/nav_unselected" />
 
                 <TextView
+                    android:id="@+id/tv_nav_friends"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -589,12 +1021,14 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/iv_nav_interaction"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@drawable/ic_nav_interaction"
                     app:tint="@color/nav_unselected" />
 
                 <TextView
+                    android:id="@+id/tv_nav_interaction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -615,12 +1049,14 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/iv_nav_profile"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@drawable/ic_nav_profile"
                     app:tint="@color/nav_unselected" />
 
                 <TextView
+                    android:id="@+id/tv_nav_profile"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -630,7 +1066,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Cute Floating Center Action Button (Raised above navbar) -->
+        <!-- Raised Center Floating Button (Toggles 3D Mascot Screen Overlay) -->
         <FrameLayout
             android:id="@+id/nav_btn_center_action"
             android:layout_width="54dp"

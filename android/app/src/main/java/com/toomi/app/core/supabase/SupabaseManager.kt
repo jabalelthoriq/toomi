@@ -350,6 +350,45 @@ object SupabaseManager {
         }
     }
 
+    /**
+     * Mengambil daftar login request yang sedang PENDING untuk akun ini
+     */
+    suspend fun getPendingLoginRequests(): List<LoginRequest> {
+        val userId = getCurrentUserId() ?: return emptyList()
+        return try {
+            client.postgrest["login_requests"]
+                .select {
+                    filter {
+                        eq("user_id", userId)
+                        eq("status", "PENDING")
+                    }
+                }
+                .decodeList<LoginRequest>()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching pending login requests", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Memeriksa status login request tertentu (misal: PENDING, APPROVED, REJECTED)
+     */
+    suspend fun getLoginRequestStatus(requestId: String): String? {
+        return try {
+            val req = client.postgrest["login_requests"]
+                .select {
+                    filter {
+                        eq("id", requestId)
+                    }
+                }
+                .decodeSingleOrNull<LoginRequest>()
+            req?.status
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching login request status", e)
+            null
+        }
+    }
+
     // ========================================================
     // 3. TOOMI ID & MULTI-FRIEND PAIRING SYSTEM
     // ========================================================

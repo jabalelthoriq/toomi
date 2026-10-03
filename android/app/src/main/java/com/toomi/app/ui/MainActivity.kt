@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,12 +15,13 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.toomi.app.R
 import com.toomi.app.core.supabase.SupabaseManager
@@ -28,6 +30,7 @@ import com.toomi.app.core.supabase.models.InteractionBroadcastPayload
 import com.toomi.app.core.supabase.models.Profile
 import com.toomi.app.databinding.ActivityMainBinding
 import com.toomi.app.service.FloatingOverlayService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -38,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private var myProfile: Profile? = null
     private var activePairedFriend: FriendItem? = null
     private var incomingLoginDialog: AlertDialog? = null
+    private var currentTabIndex = 0
 
     private val availablePets = listOf(
         "Kucing (Cat)" to "animal-cat.glb",
@@ -82,11 +86,55 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupNavigationTabs()
         setupPetSelector()
         setupListeners()
         loadUserProfile()
         loadFriendsList()
         listenToDeviceControlEvents()
+    }
+
+    /**
+     * Konfigurasi Curved Bottom Navbar dan Tab Switcher yang fungsional
+     */
+    private fun setupNavigationTabs() {
+        switchTab(0) // Default: Beranda
+
+        binding.navTabHome.setOnClickListener { switchTab(0) }
+        binding.navTabFriends.setOnClickListener { switchTab(1) }
+        binding.navTabInteraction.setOnClickListener { switchTab(2) }
+        binding.navTabProfile.setOnClickListener { switchTab(3) }
+
+        // Center Action Button (Quick Toggle Overlay)
+        binding.navBtnCenterAction.setOnClickListener {
+            toggleOverlayService()
+        }
+    }
+
+    private fun switchTab(index: Int) {
+        currentTabIndex = index
+
+        // Sembunyikan semua tab container
+        binding.layoutTabHome.visibility = if (index == 0) View.VISIBLE else View.GONE
+        binding.layoutTabFriends.visibility = if (index == 1) View.VISIBLE else View.GONE
+        binding.layoutTabInteraction.visibility = if (index == 2) View.VISIBLE else View.GONE
+        binding.layoutTabProfile.visibility = if (index == 3) View.VISIBLE else View.GONE
+
+        // Update warna dan gaya item di Curved Navbar
+        val selectedColor = ContextCompat.getColor(this, R.color.nav_selected)
+        val unselectedColor = ContextCompat.getColor(this, R.color.nav_unselected)
+
+        fun updateTabItem(iv: ImageView, tv: TextView, isSelected: Boolean) {
+            val color = if (isSelected) selectedColor else unselectedColor
+            iv.setColorFilter(color)
+            tv.setTextColor(color)
+            tv.typeface = if (isSelected) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
+        }
+
+        updateTabItem(binding.ivNavHome, binding.tvNavHome, index == 0)
+        updateTabItem(binding.ivNavFriends, binding.tvNavFriends, index == 1)
+        updateTabItem(binding.ivNavInteraction, binding.tvNavInteraction, index == 2)
+        updateTabItem(binding.ivNavProfile, binding.tvNavProfile, index == 3)
     }
 
     /**
@@ -98,9 +146,11 @@ class MainActivity : AppCompatActivity() {
             if (profile != null) {
                 myProfile = profile
                 binding.tvUserDisplayName.text = profile.displayName
+                binding.tvProfileName.text = profile.displayName
                 binding.tvUserEmail.text = profile.email ?: "Akun Terverifikasi"
                 binding.tvMyToomiId.text = profile.toomiId.ifEmpty { "TM-NEW" }
-                binding.tvDeviceInfo.text = "📱 ${SupabaseManager.getDeviceName()}"
+                binding.tvDeviceInfo.text = "📱 HP: ${SupabaseManager.getDeviceName()}"
+                binding.tvHomeDeviceStatus.text = "📱 ${SupabaseManager.getDeviceName()}"
             }
         }
     }
@@ -178,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                 val isCurrentPair = activePairedFriend?.friendProfile?.id == item.friendProfile.id
                 if (isCurrentPair) {
                     btnPair.text = "Aktif ✅"
-                    btnPair.setBackgroundColor(getColor(R.color.accent))
+                    btnPair.setBackgroundColor(getColor(R.color.accent_mint_text))
                 } else {
                     btnPair.text = "Pasang 💖"
                     btnPair.setBackgroundColor(getColor(R.color.primary))
@@ -195,10 +245,46 @@ class MainActivity : AppCompatActivity() {
 
     private fun setActivePairedFriend(friendItem: FriendItem) {
         activePairedFriend = friendItem
-        binding.tvActivePairedFriend.text = "${friendItem.friendProfile.displayName} (${friendItem.friendProfile.toomiId})"
+        val friendText = "${friendItem.friendProfile.displayName} (${friendItem.friendProfile.toomiId})"
+        binding.tvActivePairedFriend.text = friendText
+        binding.tvInteractionTarget.text = "🟢 $friendText"
+
         SupabaseManager.subscribeToFriendInteractions(friendItem.friendProfile.id)
         Toast.makeText(this, "Teman aktif diubah ke ${friendItem.friendProfile.displayName}", Toast.LENGTH_SHORT).show()
         loadFriendsList()
+    }
+
+    private var pendingRequestPollingJob: Job? = null
+
+    override fun onResume() {
+        super.onResume()
+        checkPendingLoginRequests()
+        startPendingRequestPolling()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        pendingRequestPollingJob?.cancel()
+    }
+
+    private fun startPendingRequestPolling() {
+        pendingRequestPollingJob?.cancel()
+        pendingRequestPollingJob = lifecycleScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(3000)
+                checkPendingLoginRequests()
+            }
+        }
+    }
+
+    private fun checkPendingLoginRequests() {
+        lifecycleScope.launch {
+            val pendingList = SupabaseManager.getPendingLoginRequests()
+            if (pendingList.isNotEmpty()) {
+                val latest = pendingList.first()
+                showIncomingLoginApprovalDialog(latest.requesterDeviceName, latest.id)
+            }
+        }
     }
 
     /**
@@ -210,24 +296,24 @@ class MainActivity : AppCompatActivity() {
             SupabaseManager.deviceControlEvents.collectLatest { event ->
                 when (event.eventType) {
                     "LOGIN_REQUEST" -> {
-                        // Perangkat lain ingin masuk -> Tampilkan dialog ACC / Tolak
                         val reqDevice = event.requesterDeviceName ?: "Perangkat Lain"
                         val reqId = event.requestId ?: ""
                         showIncomingLoginApprovalDialog(reqDevice, reqId)
                     }
                     "KICK_OUT" -> {
-                        // Sesi telah diambil alih oleh perangkat baru -> Terlempar keluar
                         handleKickOut()
                     }
                 }
             }
         }
+        checkPendingLoginRequests()
     }
 
     /**
      * Dialog konfirmasi ACC jika ada HP lain yang mencoba masuk ke akun ini
      */
     private fun showIncomingLoginApprovalDialog(requesterDevice: String, requestId: String) {
+        if (incomingLoginDialog?.isShowing == true) return
         incomingLoginDialog?.dismiss()
         val builder = AlertDialog.Builder(this)
             .setTitle("⚠️ Permintaan Masuk Perangkat Baru")
@@ -340,55 +426,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Quick Interactions (Poke / Wave) ke teman yang sedang dipasangkan
-        binding.btnSendPoke.setOnClickListener {
-            val friend = activePairedFriend
-            if (friend == null) {
-                Toast.makeText(this, "Pilih teman di daftar terlebih dahulu!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val senderId = SupabaseManager.getCurrentUserId() ?: "my_device"
-            SupabaseManager.broadcastInteraction(
-                InteractionBroadcastPayload(
-                    eventType = "POKE",
-                    senderId = senderId,
-                    receiverId = friend.friendProfile.id,
-                    animationCode = "POKE",
-                    message = "${myProfile?.displayName ?: "Temanmu"} mencubitmu! 💖"
-                )
-            )
-            Toast.makeText(this, "Poke terkirim ke ${friend.friendProfile.displayName}!", Toast.LENGTH_SHORT).show()
-        }
+        binding.btnSendPoke.setOnClickListener { sendInteraction("POKE", "Cubit 💖", "${myProfile?.displayName ?: "Temanmu"} mencubitmu! 💖") }
+        binding.btnSendWave.setOnClickListener { sendInteraction("WAVE", "Lambaian 👋", "${myProfile?.displayName ?: "Temanmu"} melambaikan tangan! 👋") }
 
-        binding.btnSendWave.setOnClickListener {
-            val friend = activePairedFriend
-            if (friend == null) {
-                Toast.makeText(this, "Pilih teman di daftar terlebih dahulu!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val senderId = SupabaseManager.getCurrentUserId() ?: "my_device"
-            SupabaseManager.broadcastInteraction(
-                InteractionBroadcastPayload(
-                    eventType = "WAVE",
-                    senderId = senderId,
-                    receiverId = friend.friendProfile.id,
-                    animationCode = "WAVE",
-                    message = "${myProfile?.displayName ?: "Temanmu"} melambaikan tangan! 👋"
-                )
-            )
-            Toast.makeText(this, "Lambaian terkirim ke ${friend.friendProfile.displayName}!", Toast.LENGTH_SHORT).show()
-        }
+        // Interaction Tab Actions
+        binding.btnActionPoke.setOnClickListener { sendInteraction("POKE", "Cubit (Poke) 💖", "${myProfile?.displayName ?: "Temanmu"} mencubitmu! 💖") }
+        binding.btnActionWave.setOnClickListener { sendInteraction("WAVE", "Lambaian 👋", "${myProfile?.displayName ?: "Temanmu"} melambaikan tangan! 👋") }
+        binding.btnActionLove.setOnClickListener { sendInteraction("HEART", "Kirim Cinta 💌", "${myProfile?.displayName ?: "Temanmu"} mengirimkan cinta! 💌") }
+        binding.btnActionPat.setOnClickListener { sendInteraction("PAT", "Tepuk Sayang 🐾", "${myProfile?.displayName ?: "Temanmu"} menepuk manja! 🐾") }
 
         // Toggle Floating Overlay Service
         binding.btnToggleOverlay.setOnClickListener {
-            if (isOverlayRunning) {
-                stopOverlayService()
-            } else {
-                if (checkOverlayPermission()) {
-                    startOverlayService()
-                } else {
-                    requestOverlayPermission()
-                }
-            }
+            toggleOverlayService()
         }
 
         // Tombol Logout
@@ -406,41 +455,37 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton("Batal", null)
                 .show()
         }
+    }
 
-        // Curved Bottom Navigation Bar Handlers
-        binding.navTabHome.setOnClickListener {
-            Toast.makeText(this, "Beranda Toomi ✨", Toast.LENGTH_SHORT).show()
+    private fun sendInteraction(type: String, actionName: String, messageText: String) {
+        val friend = activePairedFriend
+        if (friend == null) {
+            Toast.makeText(this, "Pilih teman di tab Teman terlebih dahulu!", Toast.LENGTH_SHORT).show()
+            switchTab(1) // Pindah ke tab Teman
+            return
         }
+        val senderId = SupabaseManager.getCurrentUserId() ?: "my_device"
+        SupabaseManager.broadcastInteraction(
+            InteractionBroadcastPayload(
+                eventType = type,
+                senderId = senderId,
+                receiverId = friend.friendProfile.id,
+                animationCode = type,
+                message = messageText
+            )
+        )
+        Toast.makeText(this, "$actionName terkirim ke ${friend.friendProfile.displayName}!", Toast.LENGTH_SHORT).show()
+    }
 
-        binding.navTabFriends.setOnClickListener {
-            binding.etSearchToomiId.requestFocus()
-            Toast.makeText(this, "Tambah & Kelola Teman", Toast.LENGTH_SHORT).show()
-        }
-
-        // Center Cute Floating Action Button: Quick Toggle Overlay
-        binding.navBtnCenterAction.setOnClickListener {
-            if (isOverlayRunning) {
-                stopOverlayService()
+    private fun toggleOverlayService() {
+        if (isOverlayRunning) {
+            stopOverlayService()
+        } else {
+            if (checkOverlayPermission()) {
+                startOverlayService()
             } else {
-                if (checkOverlayPermission()) {
-                    startOverlayService()
-                } else {
-                    requestOverlayPermission()
-                }
+                requestOverlayPermission()
             }
-        }
-
-        binding.navTabInteraction.setOnClickListener {
-            if (activePairedFriend == null) {
-                Toast.makeText(this, "Pilih teman di daftar untuk berinteraksi!", Toast.LENGTH_SHORT).show()
-            } else {
-                binding.btnSendPoke.performClick()
-            }
-        }
-
-        binding.navTabProfile.setOnClickListener {
-            val toomiId = binding.tvMyToomiId.text.toString()
-            Toast.makeText(this, "Profil Anda: $toomiId", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -471,7 +516,7 @@ class MainActivity : AppCompatActivity() {
         }
         isOverlayRunning = true
         binding.btnToggleOverlay.text = getString(R.string.btn_stop_overlay)
-        Toast.makeText(this, "Karakter melayang aktif!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Karakter melayang aktif! ✨", Toast.LENGTH_SHORT).show()
     }
 
     private fun stopOverlayService() {
@@ -479,6 +524,7 @@ class MainActivity : AppCompatActivity() {
         stopService(intent)
         isOverlayRunning = false
         binding.btnToggleOverlay.text = getString(R.string.btn_start_overlay)
+        Toast.makeText(this, "Karakter melayang dinonaktifkan.", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {

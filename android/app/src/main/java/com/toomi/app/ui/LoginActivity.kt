@@ -270,6 +270,27 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // Polling status secara berkala jika sinyal WebSocket terputus
+        if (!requestId.isNullOrEmpty()) {
+            lifecycleScope.launch {
+                while (approvalDialog?.isShowing == true) {
+                    kotlinx.coroutines.delay(2000)
+                    val status = SupabaseManager.getLoginRequestStatus(requestId)
+                    if (status == "APPROVED") {
+                        approvalDialog?.dismiss()
+                        Toast.makeText(this@LoginActivity, "Persetujuan diterima! Berhasil masuk.", Toast.LENGTH_LONG).show()
+                        proceedToMain()
+                        break
+                    } else if (status == "REJECTED") {
+                        approvalDialog?.dismiss()
+                        Toast.makeText(this@LoginActivity, "Permintaan masuk ditolak oleh HP aktif.", Toast.LENGTH_LONG).show()
+                        SupabaseManager.signOut()
+                        break
+                    }
+                }
+            }
+        }
     }
 
     private fun proceedToMain() {
