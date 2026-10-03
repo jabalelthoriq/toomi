@@ -255,13 +255,13 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Single Device Policy Info -->
+        <!-- Footer Info -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:gravity="center"
-            android:text="🔒 Kebijakan Keamanan: 1 Akun hanya aktif di 1 HP.\nJika masuk di HP baru, Anda memerlukan persetujuan (ACC) dari HP aktif."
+            android:text="Toomi 3D Companion • Terhubung bersama teman &amp; pasangan 💕"
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 

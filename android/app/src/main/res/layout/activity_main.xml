@@ -61,14 +61,14 @@
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/tv_home_device_status"
+                        android:id="@+id/tv_home_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_pastel_chip"
                         android:backgroundTint="@color/accent_mint_bg"
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="5dp"
-                        android:text="📱 HP Terhubung"
+                        android:text="Online 🟢"
                         android:textColor="@color/accent_mint_text"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -860,7 +860,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Single Device Policy Card -->
+                <!-- App Info & Multi-Device Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -880,17 +880,17 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="KEAMANAN PERANGKAT (1 USER = 1 HP)"
+                            android:text="INFORMASI APLIKASI"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/tv_device_info"
+                            android:id="@+id/tv_app_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:text="📱 HP Terhubung: Memuat..."
+                            android:text="Toomi 3D Companion • v1.0.0"
                             android:textColor="@color/text_dark"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -899,7 +899,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Status: Terverifikasi Aktif 🔒\nJika Anda login di HP baru, HP ini akan menerima dialog persetujuan (ACC) secara otomatis."
+                            android:text="Status: Akun Aktif &amp; Siap Terhubung 💕\nAnda dapat login di berbagai perangkat secara bebas tanpa batasan."
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>

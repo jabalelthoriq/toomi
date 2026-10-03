@@ -1,7 +1,6 @@
 package com.toomi.app.ui
 
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -21,8 +20,6 @@ import com.toomi.app.databinding.ActivityLoginBinding
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.handleDeeplinks
 import io.github.jan.supabase.auth.providers.Google
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -33,18 +30,18 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private var pendingEmail: String = ""
-    private var approvalDialog: AlertDialog? = null
-    private var deviceControlJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Jika user sudah login sebelumnya, langsung lanjut ke MainActivity
+        if (SupabaseManager.isUserLoggedIn()) {
+            proceedToMain()
+            return
+        }
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Periksa apakah ada sesi tersimpan
-        if (SupabaseManager.isUserLoggedIn()) {
-            checkActiveDeviceSessionAndProceed()
-        }
 
         setupListeners()
     }
@@ -52,7 +49,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (SupabaseManager.isUserLoggedIn()) {
-            checkActiveDeviceSessionAndProceed()
+            proceedToMain()
         }
     }
 
@@ -65,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
                 try {
                     SupabaseManager.client.handleDeeplinks(intent)
                     if (SupabaseManager.isUserLoggedIn()) {
-                        checkActiveDeviceSessionAndProceed()
+                        proceedToMain()
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error handling oauth deeplink", e)
@@ -122,7 +119,7 @@ class LoginActivity : AppCompatActivity() {
                 Log.e(TAG, "Gagal kirim OTP", err)
                 val msg = when {
                     err.message?.contains("Database error", ignoreCase = true) == true ->
-                        "Error database Supabase. Jalankan query SQL perbaikan terbaru di SQL Editor."
+                        "Error database Supabase. Silakan coba kembali."
                     else -> "Gagal mengirim OTP: ${err.message}"
                 }
                 Toast.makeText(this@LoginActivity, msg, Toast.LENGTH_LONG).show()
@@ -137,7 +134,7 @@ class LoginActivity : AppCompatActivity() {
             setLoading(false)
             result.onSuccess {
                 Toast.makeText(this@LoginActivity, "Verifikasi Berhasil!", Toast.LENGTH_SHORT).show()
-                checkActiveDeviceSessionAndProceed()
+                proceedToMain()
             }.onFailure { err ->
                 Toast.makeText(this@LoginActivity, "Kode OTP salah atau kedaluwarsa: ${err.message}", Toast.LENGTH_LONG).show()
             }
@@ -175,7 +172,7 @@ class LoginActivity : AppCompatActivity() {
                         
                         res.onSuccess {
                             Toast.makeText(this@LoginActivity, "Login Google Berhasil!", Toast.LENGTH_SHORT).show()
-                            checkActiveDeviceSessionAndProceed()
+                            proceedToMain()
                         }.onFailure { err ->
                             Log.e(TAG, "Supabase ID Token validation failed", err)
                             val alertMsg = "Supabase menolak ID Token: ${err.message}\n\nPastikan Client ID di Supabase Dashboard (Auth > Providers > Google) persis sama dengan Web Client ID ini:\n${SupabaseConfig.GOOGLE_WEB_CLIENT_ID}"
@@ -216,28 +213,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Mendaftarkan perangkat ini sebagai sesi aktif dan langsung masuk ke halaman utama
-     * Sesi pada perangkat lama akan otomatis dinonaktifkan (Single Device Policy)
-     */
-    private fun checkActiveDeviceSessionAndProceed() {
-        setLoading(true)
-        lifecycleScope.launch {
-            val sessionResponse = SupabaseManager.requestDeviceSession()
-            setLoading(false)
-
-            if (sessionResponse.isSwitched) {
-                val prevName = sessionResponse.previousDeviceName ?: "Perangkat sebelumnya"
-                Toast.makeText(
-                    this@LoginActivity,
-                    "Sesi berhasil dialihkan dari $prevName ke HP ini! ✨",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            proceedToMain()
-        }
-    }
-
     private fun proceedToMain() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -250,11 +225,5 @@ class LoginActivity : AppCompatActivity() {
         binding.btnSendOtp.isEnabled = !isLoading
         binding.btnVerifyOtp.isEnabled = !isLoading
         binding.btnGoogleSignin.isEnabled = !isLoading
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        approvalDialog?.dismiss()
-        deviceControlJob?.cancel()
     }
 }

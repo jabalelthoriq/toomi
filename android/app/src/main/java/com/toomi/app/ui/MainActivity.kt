@@ -30,8 +30,6 @@ import com.toomi.app.core.supabase.models.InteractionBroadcastPayload
 import com.toomi.app.core.supabase.models.Profile
 import com.toomi.app.databinding.ActivityMainBinding
 import com.toomi.app.service.FloatingOverlayService
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -40,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private var isOverlayRunning = false
     private var myProfile: Profile? = null
     private var activePairedFriend: FriendItem? = null
-    private var incomingLoginDialog: AlertDialog? = null
     private var currentTabIndex = 0
 
     private val availablePets = listOf(
@@ -91,7 +88,12 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
         loadUserProfile()
         loadFriendsList()
-        listenToDeviceControlEvents()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadUserProfile()
+        loadFriendsList()
     }
 
     /**
@@ -149,8 +151,7 @@ class MainActivity : AppCompatActivity() {
                 binding.tvProfileName.text = profile.displayName
                 binding.tvUserEmail.text = profile.email ?: "Akun Terverifikasi"
                 binding.tvMyToomiId.text = profile.toomiId.ifEmpty { "TM-NEW" }
-                binding.tvDeviceInfo.text = "📱 HP: ${SupabaseManager.getDeviceName()}"
-                binding.tvHomeDeviceStatus.text = "📱 ${SupabaseManager.getDeviceName()}"
+                binding.tvHomeStatus.text = "Online 🟢"
             }
         }
     }
@@ -254,69 +255,6 @@ class MainActivity : AppCompatActivity() {
         loadFriendsList()
     }
 
-    private var heartbeatJob: Job? = null
-
-    override fun onResume() {
-        super.onResume()
-        startHeartbeat()
-        checkDeviceSessionValidity()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        heartbeatJob?.cancel()
-    }
-
-    private fun startHeartbeat() {
-        heartbeatJob?.cancel()
-        heartbeatJob = lifecycleScope.launch {
-            while (true) {
-                SupabaseManager.updateDeviceHeartbeat()
-                kotlinx.coroutines.delay(60000) // 1 menit
-            }
-        }
-    }
-
-    private fun checkDeviceSessionValidity() {
-        lifecycleScope.launch {
-            val isActive = SupabaseManager.isCurrentDeviceActive()
-            if (!isActive) {
-                handleKickOut("Perangkat Baru Lain")
-            }
-        }
-    }
-
-    /**
-     * Mendengarkan event kontrol sesi perangkat akun (1 User 1 HP)
-     */
-    private fun listenToDeviceControlEvents() {
-        SupabaseManager.listenToDeviceControl()
-        lifecycleScope.launch {
-            SupabaseManager.deviceControlEvents.collectLatest { event ->
-                when (event.eventType) {
-                    "KICK_OUT" -> {
-                        val reqDevice = event.requesterDeviceName ?: "Perangkat Baru"
-                        handleKickOut(reqDevice)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleKickOut(newDeviceName: String = "Perangkat Baru") {
-        stopOverlayService()
-        if (isFinishing || isDestroyed) return
-
-        AlertDialog.Builder(this)
-            .setTitle("🔒 Sesi Berakhir")
-            .setMessage("Akun Toomi Anda telah masuk di perangkat baru ($newDeviceName).\n\nSesuai kebijakan keamanan (1 Akun = 1 HP Aktif), sesi pada HP ini telah dinonaktifkan.")
-            .setCancelable(false)
-            .setPositiveButton("Mengerti") { _, _ ->
-                redirectToLogin()
-            }
-            .show()
-    }
-
     private fun redirectToLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -412,7 +350,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnLogout.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Keluar Akun")
-                .setMessage("Apakah Anda yakin ingin keluar dari perangkat ini? Anda dapat masuk kembali di HP mana pun nanti.")
+                .setMessage("Apakah Anda yakin ingin keluar dari akun ini?")
                 .setPositiveButton("Keluar") { _, _ ->
                     lifecycleScope.launch {
                         stopOverlayService()
@@ -493,10 +431,5 @@ class MainActivity : AppCompatActivity() {
         isOverlayRunning = false
         binding.btnToggleOverlay.text = getString(R.string.btn_start_overlay)
         Toast.makeText(this, "Karakter melayang dinonaktifkan.", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        incomingLoginDialog?.dismiss()
     }
 }
