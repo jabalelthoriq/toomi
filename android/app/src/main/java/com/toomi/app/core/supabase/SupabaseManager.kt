@@ -357,13 +357,38 @@ object SupabaseManager {
     suspend fun getMyProfile(): Profile? {
         val userId = getCurrentUserId() ?: return null
         return try {
-            client.postgrest["profiles"]
+            val existing = client.postgrest["profiles"]
                 .select {
                     filter {
                         eq("id", userId)
                     }
                 }
                 .decodeSingleOrNull<Profile>()
+
+            if (existing != null) {
+                return existing
+            }
+
+            // Fallback: Jika profile belum terbuat di DB, generate toomi_id dan insert
+            val genId = "TM-" + UUID.randomUUID().toString().replace("-", "").take(6).uppercase()
+            val userEmail = client.auth.currentSessionOrNull()?.user?.email
+            val defaultName = userEmail?.substringBefore("@") ?: "Toomi User"
+
+            val fallbackProfile = Profile(
+                id = userId,
+                toomiId = genId,
+                email = userEmail,
+                displayName = defaultName,
+                characterModelId = "animal-cat.glb"
+            )
+
+            try {
+                client.postgrest["profiles"].insert(fallbackProfile)
+            } catch (insertErr: Exception) {
+                Log.w(TAG, "Fallback profile insert ignored", insertErr)
+            }
+
+            fallbackProfile
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching profile", e)
             null

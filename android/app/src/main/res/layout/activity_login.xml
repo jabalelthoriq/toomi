@@ -211,16 +211,24 @@
                         android:background="#333333" />
                 </LinearLayout>
 
-                <!-- Google Sign In Button -->
-                <Button
+                <!-- Google Sign In Button with Official Logo -->
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_google_signin"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:backgroundTint="#2C2C2C"
-                    android:text="🌐  Masuk dengan Google"
+                    android:backgroundTint="#FFFFFF"
+                    android:text="Masuk dengan Google"
                     android:textAllCaps="false"
-                    android:textColor="@color/text_white"
-                    android:textSize="15sp" />
+                    android:textColor="#1F1F1F"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="10dp"
+                    app:icon="@drawable/ic_google_logo"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconTint="@null"
+                    app:strokeColor="#DDDDDD"
+                    app:strokeWidth="1dp" />
 
                 <!-- Loading State -->
                 <ProgressBar

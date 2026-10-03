@@ -52,6 +52,11 @@ dependencies {
     implementation(libs.filament.utils.android)
     implementation(libs.gltfio.android)
 
+    // Google Sign-In (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     // Supabase SDK
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.realtime)

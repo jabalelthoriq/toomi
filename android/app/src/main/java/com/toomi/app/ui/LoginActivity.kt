@@ -4,10 +4,18 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.lifecycleScope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.toomi.app.core.config.SupabaseConfig
 import com.toomi.app.core.supabase.SupabaseManager
 import com.toomi.app.databinding.ActivityLoginBinding
 import io.github.jan.supabase.auth.auth
@@ -17,6 +25,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "LoginActivity"
+    }
 
     private lateinit var binding: ActivityLoginBinding
     private var pendingEmail: String = ""
@@ -81,7 +93,13 @@ class LoginActivity : AppCompatActivity() {
                 binding.tvOtpSentInfo.text = "Kode OTP 6-digit telah dikirim ke:\n$email"
                 Toast.makeText(this@LoginActivity, "Kode OTP terkirim! Cek inbox/spam email Anda.", Toast.LENGTH_LONG).show()
             }.onFailure { err ->
-                Toast.makeText(this@LoginActivity, "Gagal mengirim OTP: ${err.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Gagal kirim OTP", err)
+                val msg = when {
+                    err.message?.contains("Database error", ignoreCase = true) == true ->
+                        "Error database Supabase. Jalankan query SQL perbaikan terbaru di SQL Editor."
+                    else -> "Gagal mengirim OTP: ${err.message}"
+                }
+                Toast.makeText(this@LoginActivity, msg, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -103,13 +121,52 @@ class LoginActivity : AppCompatActivity() {
     private fun signInWithGoogle() {
         setLoading(true)
         lifecycleScope.launch {
+            // Coba dengan Google Credential Manager jika Client ID tersedia
+            if (SupabaseConfig.GOOGLE_WEB_CLIENT_ID.isNotEmpty()) {
+                try {
+                    val credentialManager = CredentialManager.create(this@LoginActivity)
+                    val googleIdOption = GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setServerClientId(SupabaseConfig.GOOGLE_WEB_CLIENT_ID)
+                        .setAutoSelectEnabled(false)
+                        .build()
+
+                    val request = GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                    val response = credentialManager.getCredential(this@LoginActivity, request)
+                    val credential = response.credential
+
+                    if (credential is CustomCredential &&
+                        credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                        val idToken = googleIdTokenCredential.idToken
+                        val res = SupabaseManager.signInWithGoogle(idToken)
+                        setLoading(false)
+                        res.onSuccess {
+                            checkActiveDeviceSessionAndProceed()
+                        }.onFailure {
+                            Toast.makeText(this@LoginActivity, "Login Supabase gagal: ${it.message}", Toast.LENGTH_LONG).show()
+                        }
+                        return@launch
+                    }
+                } catch (e: GetCredentialCancellationException) {
+                    setLoading(false)
+                    return@launch
+                } catch (e: Exception) {
+                    Log.w(TAG, "Credential manager fallback to OAuth", e)
+                }
+            }
+
+            // Fallback: Supabase Web OAuth
             try {
-                // Gunakan Supabase OAuth Flow
                 SupabaseManager.client.auth.signInWith(Google)
                 setLoading(false)
                 checkActiveDeviceSessionAndProceed()
             } catch (e: Exception) {
                 setLoading(false)
+                Log.e(TAG, "Error signing in with Google", e)
                 Toast.makeText(this@LoginActivity, "Login Google gagal: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -125,10 +182,8 @@ class LoginActivity : AppCompatActivity() {
             setLoading(false)
 
             if (sessionResponse.status == "GRANTED") {
-                // Perangkat ini langsung menjadi perangkat aktif
                 proceedToMain()
             } else if (sessionResponse.status == "NEED_APPROVAL") {
-                // Ada HP lain yang sedang aktif -> Tampilkan dialog menunggu persetujuan (ACC)
                 val activeDevName = sessionResponse.activeDeviceName ?: "HP Anda yang lain"
                 val reqId = sessionResponse.requestId
                 showWaitingApprovalDialog(activeDevName, reqId)
