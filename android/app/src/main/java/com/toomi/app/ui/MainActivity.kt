@@ -406,6 +406,42 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton("Batal", null)
                 .show()
         }
+
+        // Curved Bottom Navigation Bar Handlers
+        binding.navTabHome.setOnClickListener {
+            Toast.makeText(this, "Beranda Toomi ✨", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.navTabFriends.setOnClickListener {
+            binding.etSearchToomiId.requestFocus()
+            Toast.makeText(this, "Tambah & Kelola Teman", Toast.LENGTH_SHORT).show()
+        }
+
+        // Center Cute Floating Action Button: Quick Toggle Overlay
+        binding.navBtnCenterAction.setOnClickListener {
+            if (isOverlayRunning) {
+                stopOverlayService()
+            } else {
+                if (checkOverlayPermission()) {
+                    startOverlayService()
+                } else {
+                    requestOverlayPermission()
+                }
+            }
+        }
+
+        binding.navTabInteraction.setOnClickListener {
+            if (activePairedFriend == null) {
+                Toast.makeText(this, "Pilih teman di daftar untuk berinteraksi!", Toast.LENGTH_SHORT).show()
+            } else {
+                binding.btnSendPoke.performClick()
+            }
+        }
+
+        binding.navTabProfile.setOnClickListener {
+            val toomiId = binding.tvMyToomiId.text.toString()
+            Toast.makeText(this, "Profil Anda: $toomiId", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun checkOverlayPermission(): Boolean {
