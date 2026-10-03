@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Toomi LDR Companion</string>
+    <string name="app_name">Toomi</string>
     <string name="title_pairing">Hubungkan dengan Pasangan</string>
     <string name="desc_pairing">Bagikan kode unik di bawah ini atau masukkan kode pasangan Anda.</string>
     <string name="btn_start_overlay">Aktifkan Karakter Melayang</string>

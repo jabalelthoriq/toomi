@@ -33,7 +33,7 @@ class ToomiApp : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
-                "Toomi LDR Companion Service",
+                "Toomi",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Menjaga karakter 3D dan koneksi real-time tetap aktif"

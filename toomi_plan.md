@@ -1,148 +1,87 @@
 # Spesifikasi Teknis & Arsitektur Aplikasi
-## **LDR Companion Overlay 3D (Android Edition)**
+## **Toomi: Multi-Friend 3D Companion Overlay (Android Edition)**
 
-Aplikasi mobile Android interaktif yang menghadirkan karakter 3D melayang (*floating overlay*) di atas layar homescreen dan aplikasi lain. Aplikasi ini dirancang khusus untuk pasangan LDR Gen Z agar dapat saling berinteraksi secara *real-time* langsung melalui layar HP.
+Aplikasi mobile Android interaktif yang menghadirkan karakter 3D melayang (*floating overlay*) di atas layar homescreen dan aplikasi lain. Aplikasi ini menghubungkan pengguna dengan teman-temannya secara *real-time* langsung melalui layar HP menggunakan sistem **ID Toomi**.
 
 ---
 
-## 1. Ringkasan Fitur Utama
+## 1. Ringkasan Fitur Utama & Logika Baru
 
+* **Autentikasi Wajib Google & Email OTP:** Pengguna dapat masuk menggunakan akun Google atau verifikasi kode OTP 6-digit yang dikirimkan ke Email.
+* **ID Toomi Unik & Multi-Friend Pairing:** Setiap akun mendapatkan ID Toomi unik (misal: `TM-9A2K7X`). Pairing dilakukan dengan menambahkan ID Toomi teman. 1 akun dapat berteman dan terhubung dengan banyak orang (1-to-many / multi-friend).
+* **Kebijakan 1 User = 1 HP Aktif:** Setiap user hanya dapat aktif pada 1 perangkat pada satu waktu. Jika sudah keluar (*logout*), user dapat masuk di perangkat lain tanpa hambatan.
+* **Mekanisme Login Approval & Sesi Terlempar (Kick-out):**
+  * Ketika ada perangkat baru (HP B) mencoba masuk ke akun yang sedang aktif di HP A:
+  * HP A menerima notifikasi/alert *real-time*: *"Perangkat [HP B] ingin masuk ke akun Toomi Anda. Izinkan (ACC)?"*
+  * Jika di-ACC oleh HP A:
+    * HP A otomatis terlempar keluar (*logged out* & service berhenti).
+    * HP B disetujui (*approved*) dan menjadi sesi aktif utama.
+  * Jika ditolak oleh HP A: Permintaan masuk HP B dibatalkan.
 * **Floating 3D Companion Overlay:** Karakter 3D animasi melayang transparan di atas layar homescreen maupun aplikasi Android lainnya.
-* **Real-time Cross-Screen Interactions:** Aksi di HP Pengguna A (misal: *poke*, kirim kado, ubah *mood*) langsung memicu animasi dan reaktifitas karakter di HP Pengguna B secara *real-time*.
-* **Interactive Bubble Chat & Emotes:** Pesan singkat dan emoji bertema yang muncul sebagai balon kata di atas kepala karakter, berada di luar batas aplikasi utama.
-* **Contextual & Battery-Aware Behavior:** Karakter merespons kondisi HP pasangan (misal: jika baterai pasangan di bawah 15%, karakter akan tampak lemas/tidur di layar).
-* **Drag-and-Drop Floating Window:** Karakter dapat digeser ke sudut mana pun di layar HP agar tidak mengganggu aktivitas mengetik atau membaca.
+* **Real-time Cross-Screen Interactions:** Aksi ke teman terpilih (*poke*, *wave*, bubble chat, status baterai) diproses secara *real-time* via Supabase Realtime WebSocket (< 100ms).
 
 ---
 
 ## 2. Arsitektur Teknis Sistem Android
 
-Aplikasi memanfaatkan komponen inti sistem operasi Android untuk menjaga karakter tetap aktif tanpa terhenti oleh sistem *background management*.
-
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Aplikasi Utama Android               │
-│         (Auth, Customization Avatar, Settings)          │
+│       (Auth OTP/Google, Multi-Friend List, Toomi ID)    │
 └────────────────────────────┬────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────┐
 │               Android Foreground Service                │
-│         (Jaga koneksi WebSocket & State Sync)           │
+│       (Device Session Control & Realtime Companion Sync)│
 └──────────────┬───────────────────────────┬──────────────┘
                │                           │
                ▼                           ▼
 ┌──────────────────────────────┐ ┌────────────────────────┐
-│  Window Manager (Overlay)    │ │   WebSocket Manager    │
-│ (SYSTEM_ALERT_WINDOW Permission)│ │   (Socket.io / Pusher) │
+│  Window Manager (Overlay)    │ │   Supabase Realtime    │
+│ (SYSTEM_ALERT_WINDOW)        │ │  (WebSockets Broadcast)│
 └──────────────┬───────────────┘ └───────────┬────────────┘
                │                            │
                ▼                            ▼
 ┌──────────────────────────────┐ ┌────────────────────────┐
-│ Translucent Android WebView  │ │ Event Handler Sync     │
-│ (Three.js / Filament 3D Engine)│ │ (Animasi & Bubble Chat)│
+│ Google Filament 3D Engine    │ │ Event Sync Antar Teman │
+│ (Low-Poly GLB Models)        │ │ (Animasi & Bubble Chat)│
 └──────────────────────────────┘ └────────────────────────┘
 ```
 
-### Komponen Kunci OS Android:
+---
 
-1. **`SYSTEM_ALERT_WINDOW` (Draw over other apps):**
-   * Mengizinkan tampilan jendela aplikasi berada di tingkat paling atas (*Z-order highest level*) di atas *launcher* (homescreen) dan aplikasi lain.
-2. **Foreground Service dengan Notification:**
-   * Memastikan *process* aplikasi tidak dihentikan oleh OS Android (*Low Memory Killer*) saat HP memasuki mode idle/doze mode.
-3. **Transparent WebView / Native Canvas:**
-   * Container transparan tempat menjalankan *lightweight 3D engine* (Three.js / Filament) untuk merender karakter 3D berbentuk `.gltf` / `.glb` beranimasi.
+## 3. Skema Data & Kontrol Sesi (Supabase)
+
+### Tabel Utama:
+1. `profiles`: Menyimpan `toomi_id` (unik), `email`, `display_name`, `active_device_id`, `active_device_name`, `battery_level`, dsb.
+2. `friendships`: Relasi pertemanan banyak-ke-banyak (`user_id`, `friend_id`, `status: PENDING | ACCEPTED`).
+3. `login_requests`: Antrean perizinan pergantian sesi perangkat (`requester_device_id`, `requester_device_name`, `status: PENDING | APPROVED | REJECTED`).
 
 ---
 
-## 3. Alur Komunikasi Real-time (WebSocket Payload)
+## 4. Alur Interaksi & State Device Control
 
-Komunikasi antar dua perangkat LDR diproses menggunakan event *WebSocket* terenkripsi dengan latensi rendah (< 150ms).
+```mermaid
+sequenceDiagram
+    autonumber
+    actor UserB as Pengguna di HP Baru (B)
+    participant Server as Supabase (Backend/Auth)
+    actor UserA as Pengguna di HP Aktif (A)
 
-### Schema JSON Payload Contoh:
-
-#### A. Event *Poke* & Ekspresi Karakter
-```json
-{
-  "event_type": "TRIGGER_ANIMATION",
-  "sender_id": "usr_alpha_123",
-  "receiver_id": "usr_bravo_456",
-  "timestamp": 1772546451,
-  "payload": {
-    "animation_code": "POKE_REACTION_HAPPY",
-    "sound_effect": "giggle_01.wav",
-    "bubble_chat": {
-      "text": "Pasanganmu memanggilmu! 💖",
-      "duration_ms": 3500
-    },
-    "haptic_feedback": true
-  }
-}
+    UserB->>Server: Login (Email OTP / Google)
+    Server-->>UserB: Berhasil Login & Cek Device Session
+    Server->>Server: Deteksi HP A sedang aktif
+    Server->>UserA: Broadcast: LOGIN_REQUEST (HP B ingin masuk)
+    UserA->>UserA: Dialog: "HP B ingin masuk. ACC?"
+    alt User A menekan ACC (Izinkan)
+        UserA->>Server: approve_login_request(req_id)
+        Server->>UserA: Terlempar keluar (Kick-out & Local Sign Out)
+        Server->>UserB: Broadcast: LOGIN_APPROVED
+        UserB->>UserB: Masuk ke Dashboard & HP B jadi Sesi Aktif
+    else User A menekan Tolak
+        UserA->>Server: reject_login_request(req_id)
+        Server->>UserB: Broadcast: LOGIN_REJECTED
+        UserB->>UserB: Ditolak & Tetap di Layar Login
+    end
 ```
-
-#### B. Event Update Status Kondisi Perangkat
-```json
-{
-  "event_type": "UPDATE_DEVICE_STATE",
-  "sender_id": "usr_alpha_123",
-  "receiver_id": "usr_bravo_456",
-  "timestamp": 1772546510,
-  "payload": {
-    "battery_level": 12,
-    "is_charging": false,
-    "idle_status": "SLEEPING_MODE",
-    "character_state": "TIRED_IDLE"
-  }
-}
-```
-
----
-
-## 4. Desain Antarmuka & Interaksi (UI/UX Overlay)
-
-### Gesture & Kontrol Karakter di Screensaver/Homescreen:
-
-* **Tap Tunggal (Single Tap):** Membuka *radial menu* mini berisi aksi cepat (*Kirim Hug*, *Kirim Pok*, *Kirim Pesan Cepat*).
-* **Double Tap:** Memicu animasi *affection* (karakter memberikan *love* atau lambaian tangan).
-* **Long Press + Drag:** Memindahkan posisi floating avatar ke tepi layar kiri, kanan, atas, atau bawah.
-* **Swipe Away:** Menyembunyikan karakter ke mode *edge-dock* (hanya terlihat ikon kecil di tepi layar) agar tidak menutupi tombol penting saat bermain game full screen.
-
----
-
-## 5. Manajemen Performa & Efisiensi Baterai
-
-Salah satu tantangan terbesar dari *floating overlay 3D* adalah penggunaan daya baterai dan RAM. Berikut adalah strategi optimasinya:
-
-| Area Optimasi | Strategi Implementasi | Target / Limits |
-| :--- | :--- | :--- |
-| **Model 3D Polygon** | Gunakan model Low-Poly dengan optimasi *texture atlas*. | Max 15.000 Polygon / File < 3MB |
-| **Frame Rate Control** | Batasi rendering rate saat idle dari 60 FPS ke **15-20 FPS**. | Menghemat hingga 40% CPU/GPU usage |
-| **Smart Sleep State** | Saat layar HP mati (*screen-off*), pause rendering engine total. | 0% GPU Consumption saat layar mati |
-| **Background Network** | Batasi ping heart-beat WebSocket saat kondisi idle. | Paket data efisien & konsumsi baterai rendah |
-
----
-
-## 6. Roadmap Pengembangan Proyek
-
-```
-Phase 1: Minimal Viable Product (MVP)
-  ├── Setup Android Overlay Service & Overlay Window Basic
-  ├── Integrasi WebView 3D Transparan dengan Three.js
-  └── Implementasi WebSocket Sederhana (Send/Receive Event)
-
-Phase 2: Core LDR Features
-  ├── Penambahan Animasi Character (Idle, Poke, Happy, Sad, Sleep)
-  ├── Bubble Chat System di Overlay Screen
-  └── System Event Observer (Sensors, Battery Level Sync)
-
-Phase 3: Polish & Customization
-  ├── Kustomisasi Avatar 3D (Outfit, Aksesori, Warna)
-  ├── Radial Menu Popup di Overlay Window
-  └── Mode Edge-Docking & Anti-Disturb Mode (Game Mode Protection)
-```
-```
-
----
-
-### Langkah Selanjutnya
-Jika Anda ingin mulai membangun *prototype* awal, kita bisa memulainya dengan membuat **file layout XML Android Overlay**, **Kotlin Foreground Service**, atau **script Three.js 3D dasar**. Mana yang ingin dieksekusi terlebih dahulu?

@@ -255,7 +255,7 @@ class FloatingOverlayService : Service() {
         )
 
         return NotificationCompat.Builder(this, ToomiApp.CHANNEL_ID)
-            .setContentTitle("Toomi LDR Companion")
+            .setContentTitle("Toomi")
             .setContentText("Karakter 3D & sinkronisasi pasangan sedang aktif")
             .setSmallIcon(android.R.drawable.ic_menu_compass)
             .setContentIntent(pendingIntent)
