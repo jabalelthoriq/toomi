@@ -141,7 +141,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="Kode OTP (6 Digit)"
+                        android:hint="Kode OTP (6 - 8 Digit)"
                         app:boxBackgroundColor="#121212"
                         app:boxCornerRadiusBottomEnd="10dp"
                         app:boxCornerRadiusBottomStart="10dp"
@@ -155,7 +155,7 @@
                             android:gravity="center"
                             android:inputType="number"
                             android:letterSpacing="0.2"
-                            android:maxLength="6"
+                            android:maxLength="8"
                             android:textColor="@color/text_white"
                             android:textSize="18sp"
                             android:textStyle="bold" />

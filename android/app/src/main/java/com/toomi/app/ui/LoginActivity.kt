@@ -62,8 +62,8 @@ class LoginActivity : AppCompatActivity() {
         // Step 2: Verifikasi Kode OTP
         binding.btnVerifyOtp.setOnClickListener {
             val otp = binding.etOtp.text.toString().trim()
-            if (otp.length != 6) {
-                Toast.makeText(this, "Masukkan 6 digit kode OTP!", Toast.LENGTH_SHORT).show()
+            if (otp.length !in 6..8) {
+                Toast.makeText(this, "Masukkan kode OTP yang valid (6-8 digit)!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             verifyOtp(pendingEmail, otp)
