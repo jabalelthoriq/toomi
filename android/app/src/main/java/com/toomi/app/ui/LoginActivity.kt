@@ -236,15 +236,29 @@ class LoginActivity : AppCompatActivity() {
     }
 
     /**
-     * Dialog modal menunggu persetujuan (ACC) dari perangkat lama
+     * Dialog modal menunggu persetujuan (ACC) dari perangkat lama atau opsi ambil alih sesi langsung
      */
     private fun showWaitingApprovalDialog(activeDeviceName: String, requestId: String?) {
         SupabaseManager.listenToDeviceControl()
 
         val builder = AlertDialog.Builder(this)
             .setTitle("🔒 Konfirmasi Masuk Perangkat")
-            .setMessage("Akun Toomi Anda saat ini sedang aktif di perangkat:\n\n📱 $activeDeviceName\n\nNotifikasi persetujuan (ACC) telah dikirimkan ke HP tersebut. Silakan buka HP tersebut dan tekan 'ACC (Izinkan)' untuk melanjutkan.")
+            .setMessage("Akun Toomi Anda saat ini terdaftar aktif di perangkat:\n\n📱 $activeDeviceName\n\nAnda dapat menunggu persetujuan (ACC) dari HP tersebut, atau langsung memindahkan sesi aktif ke HP ini.")
             .setCancelable(false)
+            .setPositiveButton("Pindahkan Sesi ke HP Ini") { dialog, _ ->
+                dialog.dismiss()
+                setLoading(true)
+                lifecycleScope.launch {
+                    val res = SupabaseManager.forceClaimDeviceSession()
+                    setLoading(false)
+                    Toast.makeText(this@LoginActivity, "Sesi berhasil dialihkan ke HP ini!", Toast.LENGTH_SHORT).show()
+                    proceedToMain()
+                }
+            }
+            .setNeutralButton("Tunggu ACC") { dialog, _ ->
+                // Biarkan dialog atau polling tetap berjalan
+                Toast.makeText(this, "Menunggu konfirmasi dari $activeDeviceName...", Toast.LENGTH_SHORT).show()
+            }
             .setNegativeButton("Batalkan") { dialog, _ ->
                 dialog.dismiss()
                 lifecycleScope.launch {

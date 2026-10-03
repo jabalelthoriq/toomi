@@ -255,16 +255,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var pendingRequestPollingJob: Job? = null
+    private var heartbeatJob: Job? = null
 
     override fun onResume() {
         super.onResume()
         checkPendingLoginRequests()
         startPendingRequestPolling()
+        startHeartbeat()
     }
 
     override fun onPause() {
         super.onPause()
         pendingRequestPollingJob?.cancel()
+        heartbeatJob?.cancel()
+    }
+
+    private fun startHeartbeat() {
+        heartbeatJob?.cancel()
+        heartbeatJob = lifecycleScope.launch {
+            while (true) {
+                SupabaseManager.updateDeviceHeartbeat()
+                kotlinx.coroutines.delay(60000) // 1 menit
+            }
+        }
     }
 
     private fun startPendingRequestPolling() {

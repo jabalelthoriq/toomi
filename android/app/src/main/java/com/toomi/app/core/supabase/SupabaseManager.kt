@@ -232,6 +232,55 @@ object SupabaseManager {
     }
 
     /**
+     * Mengambil alih sesi aktif secara paksa ke HP ini (misal HP lama offline/rusak/ganti HP)
+     */
+    suspend fun forceClaimDeviceSession(): DeviceSessionResponse {
+        return try {
+            val response = client.postgrest.rpc(
+                function = "force_claim_device_session",
+                parameters = buildJsonObject {
+                    put("p_device_id", getDeviceId())
+                    put("p_device_name", getDeviceName())
+                }
+            )
+            val jsonElement = response.decodeAs<kotlinx.serialization.json.JsonElement>()
+            val parsed = json.decodeFromJsonElement<DeviceSessionResponse>(jsonElement)
+
+            // Broadcast kick-out ke HP lama jika sedang online
+            getCurrentUserId()?.let { uid ->
+                broadcastDeviceControlEvent(
+                    DeviceControlBroadcastPayload(
+                        eventType = "KICK_OUT",
+                        userId = uid,
+                        requesterDeviceName = getDeviceName()
+                    )
+                )
+            }
+
+            parsed
+        } catch (e: Exception) {
+            Log.e(TAG, "Error force claiming device session", e)
+            DeviceSessionResponse(status = "GRANTED", message = e.message)
+        }
+    }
+
+    /**
+     * Memperbarui timestamp heartbeat aktivitas perangkat aktif
+     */
+    suspend fun updateDeviceHeartbeat() {
+        try {
+            client.postgrest.rpc(
+                function = "update_device_heartbeat",
+                parameters = buildJsonObject {
+                    put("p_device_id", getDeviceId())
+                }
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to update device heartbeat", e)
+        }
+    }
+
+    /**
      * Menghubungkan Realtime channel untuk kontrol sesi perangkat akun ini
      */
     fun listenToDeviceControl() {
